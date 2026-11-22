@@ -4,7 +4,7 @@ use remote/lib/core.nu ensure
 use modules/ssh.nu [ssh-options ssh-target]
 
 # 建立面板的本地SSH隧道，等待就绪后打开浏览器
-def main [--startup-timeout-seconds: int = 10] {
+def main [--startup-timeout-seconds: int = 20] {
 	ensure ($startup_timeout_seconds in 1..3600) 'Startup timeout must be between 1 and 3600 seconds'
 	let project = ($FILE | path dirname)
 	let config = (open ($project | path join remote config.json))
@@ -17,7 +17,7 @@ def main [--startup-timeout-seconds: int = 10] {
 		let deadline = ((date now) + ($startup_timeout_seconds * 1sec))
 		mut ready = false
 		while (date now) < $deadline {
-			$ready = (try { http get --max-time 500ms $url | ignore; true } catch { false })
+			$ready = (try { http get --max-time 3sec $url | ignore; true } catch { false })
 			if $ready { break }
 			sleep 250ms
 		}
